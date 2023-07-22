@@ -8,14 +8,14 @@ const port = 4000;
 const secretKey = 'my-private-key'; // Replace this with your actual secret key
 
 
-app.use(cors({ origin: 'http://localhost:3000' }));
+app.use(cors({ origin: 'process.env.MY_FRONTEND_URL' }));
 app.use(cors());
 app.use(bodyParser.json());
 
 // Middleware to check if the request is coming from the frontend
 function isFrontendRequest(req, res, next) {
   const origin = req.headers.origin;
-  const frontendDomain = 'http://localhost:3000'; // Replace 3000 with the port where your frontend is running
+  const frontendDomain = 'process.env.MY_FRONTEND_URL'; // Replace 3000 with the port where your frontend is running
 
   // Compare the request origin with the frontend domain
   if (origin === frontendDomain) {

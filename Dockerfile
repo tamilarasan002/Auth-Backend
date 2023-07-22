@@ -7,6 +7,18 @@ WORKDIR /app
 # Copy the package.json and package-lock.json files to the container
 COPY package*.json ./
 
+# Install required npm modules
+RUN npm install express
+
+# Install required npm modules
+RUN npm install cors
+
+# Install required npm modules
+RUN npm install body-parser jsonwebtoken
+
+RUN npm install jsonwebtoken
+
+
 # Install Node.js dependencies
 RUN npm install
 

@@ -3,7 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken');
-
+const port = 4000;
 const app = express();
 
 const secretKey = 'my-private-key'; // Replace this with your actual secret key
@@ -61,4 +61,6 @@ app.get('/api/tasks', isFrontendRequest, (req, res) => {
   res.json(tasks);
 });
 
-
+app.listen(port, () => {
+  console.log(`Backend service is running on http://localhost:${port}`);
+});

@@ -7,15 +7,15 @@ const app = express();
 const port = 4000;
 const secretKey = 'my-private-key'; // Replace this with your actual secret key
 
+// Set up CORS with the frontend URL
+app.use(cors({ origin: process.env.MY_FRONTEND_URL }));
 
-app.use(cors({ origin: 'process.env.MY_FRONTEND_URL' }));
-app.use(cors());
 app.use(bodyParser.json());
 
 // Middleware to check if the request is coming from the frontend
 function isFrontendRequest(req, res, next) {
   const origin = req.headers.origin;
-  const frontendDomain = 'process.env.MY_FRONTEND_URL'; // Replace 3000 with the port where your frontend is running
+  const frontendDomain = process.env.MY_FRONTEND_URL; // Use the environment variable directly
 
   // Compare the request origin with the frontend domain
   if (origin === frontendDomain) {
@@ -63,5 +63,3 @@ app.get('/api/tasks', isFrontendRequest, (req, res) => {
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
-
-

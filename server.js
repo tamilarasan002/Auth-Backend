@@ -1,4 +1,3 @@
-
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
@@ -61,6 +60,9 @@ app.get('/api/tasks', isFrontendRequest, (req, res) => {
   res.json(tasks);
 });
 
-app.listen(port, () => {
-  console.log(`Backend service is running on http://localhost:${port}`);
+// Update the listening address to 0.0.0.0 to make the server accessible to other services within the cluster
+const host = '0.0.0.0';
+
+app.listen(port, host, () => {
+  console.log(`Backend service is running on http://${host}:${port}`);
 });

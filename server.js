@@ -29,6 +29,15 @@ function isFrontendRequest(req, res, next) {
 
 // Authentication middleware
 function authenticateToken(req, res, next) {
+  const origin = req.headers.origin;
+  const frontendDomain = process.env.MY_FRONTEND_URL;
+
+  // Compare the request origin with the frontend domain
+  if (origin === frontendDomain) {
+    // If the request is coming from the frontend, continue to the next middleware/route
+    return next();
+  }
+
   const token = req.headers.authorization;
 
   if (!token) {
@@ -44,13 +53,16 @@ function authenticateToken(req, res, next) {
     // Extract the developer information (e.g., public key) from the token's payload
     const developerPublicKey = decoded.sub;
 
+    if (!developerPublicKey) {
+      return res.sendStatus(403);
+    }
+
     // Associate the developer information with the request for future reference
     req.developerPublicKey = developerPublicKey;
 
     next();
   });
 }
-
 // In-memory tasks array
 let tasks = [];
 

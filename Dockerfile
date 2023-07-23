@@ -19,6 +19,9 @@ RUN npm install body-parser jsonwebtoken
 RUN npm install jsonwebtoken
 
 
+RUN npm install axios
+
+
 # Install Node.js dependencies
 RUN npm install
 

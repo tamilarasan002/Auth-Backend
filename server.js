@@ -42,6 +42,7 @@ function authenticateToken(req, res, next) {
     }
 
     req.developerPublicKey = decoded.sub;
+    console.log('User authorized:', req.developerPublicKey); // Log the authorized user
     next();
   });
 }
@@ -53,11 +54,13 @@ let tasks = [];
 app.post('/api/tasks', isFrontendRequest, (req, res) => {
   const { task } = req.body;
   tasks.push({ task, developer: req.developerPublicKey });
+  console.log('Task added by:', req.developerPublicKey); // Log the developer who added the task
   res.status(201).json({ message: 'Task added successfully!' });
 });
 
 // Get all tasks (protected route, bypassed for frontend requests)
 app.get('/api/tasks', isFrontendRequest, (req, res) => {
+  console.log('Tasks fetched by:', req.developerPublicKey); // Log the developer who fetched the tasks
   res.json(tasks);
 });
 

@@ -37,6 +37,7 @@ function authenticateToken(req, res, next) {
 
   jwt.verify(token, secretKey, { algorithms: ['HS256'] }, (err, decoded) => {
     if (err) {
+      console.error('Token verification failed:', err);
       return res.sendStatus(403);
     }
 
@@ -61,7 +62,8 @@ app.get('/api/tasks', isFrontendRequest, (req, res) => {
 });
 
 // Update the listening address to 0.0.0.0 to make the server accessible to other services within the cluster
+const host = '0.0.0.0';
 
-app.listen(port, () => {
-  console.log(`Backend service is running on ${port}`);
+app.listen(port, host, () => {
+  console.log(`Backend service is running on http://${host}:${port}`);
 });

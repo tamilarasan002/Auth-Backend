@@ -5,7 +5,8 @@ const jwt = require('jsonwebtoken');
 const port = 4000;
 const app = express();
 
-const secretKey = process.env.authsecret; // Replace this with your actual secret key
+const secretKey = process.env.SECRET_KEY;
+ // Replace this with your actual secret key
 
 // Set up CORS with the frontend URL
 app.use(cors({ origin: process.env.MY_FRONTEND_URL }));

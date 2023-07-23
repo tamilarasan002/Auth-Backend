@@ -61,8 +61,7 @@ app.get('/api/tasks', isFrontendRequest, (req, res) => {
 });
 
 // Update the listening address to 0.0.0.0 to make the server accessible to other services within the cluster
-const host = '0.0.0.0';
 
 app.listen(port, host, () => {
-  console.log(`Backend service is running on http://${host}:${port}`);
+  console.log(`Backend service is running on ${port}`);
 });

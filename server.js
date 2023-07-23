@@ -5,8 +5,7 @@ const jwt = require('jsonwebtoken');
 const port = 4000;
 const app = express();
 
-const secretKey = process.env.SECRET_KEY;
- // Replace this with your actual secret key
+const secretKey = process.env.SECRET_KEY; // Replace this with your actual secret key
 
 // Set up CORS with the frontend URL
 app.use(cors({ origin: process.env.MY_FRONTEND_URL }));
@@ -77,4 +76,3 @@ const host = '0.0.0.0';
 app.listen(port, host, () => {
   console.log(`Backend service is running on http://${host}:${port}`);
 });
-

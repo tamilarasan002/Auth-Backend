@@ -13,25 +13,25 @@ app.use(cors({ origin: process.env.MY_FRONTEND_URL }));
 
 app.use(bodyParser.json());
 
-// Middleware to handle incoming token from the authentication service
-function receiveToken(req, res, next) {
-  const { token } = req.body;
+// Authentication middleware to validate the token
+function authenticateToken(req, res, next) {
+  const token = req.body.token;
 
   if (!token) {
-    return res.status(400).json({ error: 'Token not provided.' });
+    return res.status(401).json({ error: 'Access denied. Token not provided.' });
   }
 
   jwt.verify(token, publicKey, { algorithms: ['RS256'] }, (err, decoded) => {
     if (err) {
       console.error('Token verification failed:', err);
-      return res.status(403).json({ error: 'Invalid token.' });
+      return res.sendStatus(403);
     }
 
-    // Extract the developer information (e.g., public key) from the token's payload
-    const developerPublicKey = decoded.sub;
+    // Extract the subject (sub) from the token's payload
+    const sub = decoded.sub;
 
-    // Associate the developer information with the request for future reference
-    req.developerPublicKey = developerPublicKey;
+    // Associate the subject with the request for future reference
+    req.sub = sub;
 
     next();
   });
@@ -40,19 +40,19 @@ function receiveToken(req, res, next) {
 // In-memory tasks array
 let tasks = [];
 
-// Add a new task (protected route, requires token verification)
-app.post('/api/tasks', receiveToken, (req, res) => {
+// Add a new task (protected route, requires token validation)
+app.post('/api/tasks', authenticateToken, (req, res) => {
   const { task } = req.body;
 
-  // Use the developer public key associated with the request
-  const developerPublicKey = req.developerPublicKey;
+  // Use the subject (sub) associated with the request
+  const sub = req.sub;
 
-  tasks.push({ task, developer: developerPublicKey });
+  tasks.push({ task, developer: sub });
   res.status(201).json({ message: 'Task added successfully!' });
 });
 
-// Get all tasks (protected route, requires token verification)
-app.get('/api/tasks', receiveToken, (req, res) => {
+// Get all tasks (protected route, requires token validation)
+app.get('/api/tasks', authenticateToken, (req, res) => {
   res.json(tasks);
 });
 

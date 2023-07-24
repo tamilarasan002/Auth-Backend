@@ -13,12 +13,27 @@ app.use(cors({ origin: process.env.MY_FRONTEND_URL }));
 
 app.use(bodyParser.json());
 
-// Authentication middleware to validate the token
+// Middleware to check if the request is coming from the frontend
+function isFrontendRequest(req, res, next) {
+  const origin = req.headers.origin;
+  const frontendDomain = process.env.MY_FRONTEND_URL; // Use the environment variable directly
+
+  // Compare the request origin with the frontend domain
+  if (origin === frontendDomain) {
+    // If the request is coming from the frontend, bypass authentication and continue to the next middleware/route
+    return next();
+  }
+
+  // If the request is not coming from the frontend, proceed with authentication
+  authenticateToken(req, res, next);
+}
+
+// Authentication middleware
 function authenticateToken(req, res, next) {
-  const token = req.body.token;
+  const token = req.headers.authorization;
 
   if (!token) {
-    return res.status(401).json({ error: 'Access denied. Token not provided.' });
+    return res.sendStatus(401);
   }
 
   jwt.verify(token, publicKey, { algorithms: ['RS256'] }, (err, decoded) => {
@@ -27,11 +42,11 @@ function authenticateToken(req, res, next) {
       return res.sendStatus(403);
     }
 
-    // Extract the subject (sub) from the token's payload
-    const sub = decoded.sub;
+    // Extract the developer information (e.g., public key) from the token's payload
+    const developerPublicKey = decoded.sub;
 
-    // Associate the subject with the request for future reference
-    req.sub = sub;
+    // Associate the developer information with the request for future reference
+    req.developerPublicKey = developerPublicKey;
 
     next();
   });
@@ -40,19 +55,19 @@ function authenticateToken(req, res, next) {
 // In-memory tasks array
 let tasks = [];
 
-// Add a new task (protected route, requires token validation)
-app.post('/api/tasks', authenticateToken, (req, res) => {
+// Add a new task (protected route, bypassed for frontend requests)
+app.post('/api/tasks', isFrontendRequest, (req, res) => {
   const { task } = req.body;
 
-  // Use the subject (sub) associated with the request
-  const sub = req.sub;
+  // Use the developer public key associated with the request
+  const developerPublicKey = req.developerPublicKey;
 
-  tasks.push({ task, developer: sub });
+  tasks.push({ task, developer: developerPublicKey });
   res.status(201).json({ message: 'Task added successfully!' });
 });
 
-// Get all tasks (protected route, requires token validation)
-app.get('/api/tasks', authenticateToken, (req, res) => {
+// Get all tasks (protected route, bypassed for frontend requests)
+app.get('/api/tasks', isFrontendRequest, (req, res) => {
   res.json(tasks);
 });
 

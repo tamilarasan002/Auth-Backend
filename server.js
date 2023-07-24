@@ -3,8 +3,6 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken');
 const fs = require('fs');
-const axios = require('axios'); // Import Axios for making HTTP requests
-
 const port = 4000;
 const app = express();
 
@@ -15,33 +13,18 @@ app.use(cors({ origin: process.env.MY_FRONTEND_URL }));
 
 app.use(bodyParser.json());
 
-// Middleware to check if the request is coming from the frontend
-function isFrontendRequest(req, res, next) {
-  const origin = req.headers.origin;
-  const frontendDomain = process.env.MY_FRONTEND_URL; // Use the environment variable directly
-
-  // Compare the request origin with the frontend domain
-  if (origin === frontendDomain) {
-    // If the request is coming from the frontend, bypass authentication and continue to the next middleware/route
-    return next();
-  }
-
-  // If the request is not coming from the frontend, proceed with authentication
-  authenticateToken(req, res, next);
-}
-
-// Authentication middleware
-function authenticateToken(req, res, next) {
-  const token = req.headers.authorization;
+// Middleware to handle incoming token from the authentication service
+function receiveToken(req, res, next) {
+  const { token } = req.body;
 
   if (!token) {
-    return res.sendStatus(401);
+    return res.status(400).json({ error: 'Token not provided.' });
   }
 
   jwt.verify(token, publicKey, { algorithms: ['RS256'] }, (err, decoded) => {
     if (err) {
       console.error('Token verification failed:', err);
-      return res.sendStatus(403);
+      return res.status(403).json({ error: 'Invalid token.' });
     }
 
     // Extract the developer information (e.g., public key) from the token's payload
@@ -57,8 +40,8 @@ function authenticateToken(req, res, next) {
 // In-memory tasks array
 let tasks = [];
 
-// Add a new task (protected route, bypassed for frontend requests)
-app.post('/api/tasks', isFrontendRequest, (req, res) => {
+// Add a new task (protected route, requires token verification)
+app.post('/api/tasks', receiveToken, (req, res) => {
   const { task } = req.body;
 
   // Use the developer public key associated with the request
@@ -68,8 +51,8 @@ app.post('/api/tasks', isFrontendRequest, (req, res) => {
   res.status(201).json({ message: 'Task added successfully!' });
 });
 
-// Get all tasks (protected route, bypassed for frontend requests)
-app.get('/api/tasks', isFrontendRequest, (req, res) => {
+// Get all tasks (protected route, requires token verification)
+app.get('/api/tasks', receiveToken, (req, res) => {
   res.json(tasks);
 });
 

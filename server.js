@@ -30,17 +30,15 @@ function isFrontendRequest(req, res, next) {
 
 // Authentication middleware
 function authenticateToken(req, res, next) {
-  const token = req.headers.authorization;
-
-  if (!token) {
-    return res.sendStatus(401);
+  const authHeader = req.header('Authorization');
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'Access denied. Token not provided.' });
   }
 
+  const token = authHeader.split(' ')[1]; // Extract the token without the "Bearer" prefix
+
   jwt.verify(token, publicKey, { algorithms: ['RS256'] }, (err, decoded) => {
-    if (err) {
-      console.error('Token verification failed:', err);
-      return res.sendStatus(403);
-    }
+    if (err) return res.status(403).json({ error: 'Invalid token.' });
 
     // Extract the developer information (e.g., public key) from the token's payload
     const developerPublicKey = decoded.sub;

@@ -2,11 +2,12 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken');
+const fs = require('fs');
 const port = 4000;
 const app = express();
 
+const publicKey = fs.readFileSync('public_key.pem'); // Load the public key from file
 
-const secretKey = Buffer.from(process.env.SECRET_KEY, 'base64');
 // Set up CORS with the frontend URL
 app.use(cors({ origin: process.env.MY_FRONTEND_URL }));
 
@@ -35,7 +36,7 @@ function authenticateToken(req, res, next) {
     return res.sendStatus(401);
   }
 
-  jwt.verify(token, secretKey, { algorithms: ['HS256'] }, (err, decoded) => {
+  jwt.verify(token, publicKey, { algorithms: ['RS256'] }, (err, decoded) => {
     if (err) {
       console.error('Token verification failed:', err);
       return res.sendStatus(403);
@@ -76,4 +77,3 @@ const host = '0.0.0.0';
 app.listen(port, host, () => {
   console.log(`Backend service is running on http://${host}:${port}`);
 });
-

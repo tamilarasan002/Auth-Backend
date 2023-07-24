@@ -24,13 +24,13 @@ function isFrontendRequest(req, res, next) {
     return next();
   }
 
-  // If the request is not coming from the frontend, proceed with token verification
+  // If the request is not coming from the frontend, proceed with authentication
   authenticateToken(req, res, next);
 }
 
 // Authentication middleware
 function authenticateToken(req, res, next) {
-  const token = req.body.token;
+  const token = req.headers.authorization;
 
   if (!token) {
     return res.sendStatus(401);
@@ -42,11 +42,11 @@ function authenticateToken(req, res, next) {
       return res.sendStatus(403);
     }
 
-    // Extract the developer information (e.g., subject) from the token's payload
-    const developerSubject = decoded.sub;
+    // Extract the developer information (e.g., public key) from the token's payload
+    const developerPublicKey = decoded.sub;
 
     // Associate the developer information with the request for future reference
-    req.developerSubject = developerSubject;
+    req.developerPublicKey = developerPublicKey;
 
     next();
   });
@@ -57,18 +57,12 @@ let tasks = [];
 
 // Add a new task (protected route, bypassed for frontend requests)
 app.post('/api/tasks', isFrontendRequest, (req, res) => {
-  const { token } = req.body;
-  if (!token) {
-    return res.status(401).json({ error: 'Token not provided' });
-  }
-
-  // Use the developer subject associated with the request
-  const developerSubject = req.developerSubject;
-
-  // Perform additional checks or validations based on the developerSubject if needed.
-
   const { task } = req.body;
-  tasks.push({ task, developer: developerSubject });
+
+  // Use the developer public key associated with the request
+  const developerPublicKey = req.developerPublicKey;
+
+  tasks.push({ task, developer: developerPublicKey });
   res.status(201).json({ message: 'Task added successfully!' });
 });
 

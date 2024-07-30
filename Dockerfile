@@ -1,5 +1,5 @@
-# Use the official Node.js image as the base image for building the Node.js backend
-FROM node:14.17.6-alpine
+# Use the UBI image as the base image
+FROM registry.access.redhat.com/ubi8/nodejs-14
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -9,18 +9,9 @@ COPY package*.json ./
 
 # Install required npm modules
 RUN npm install express
-
-# Install required npm modules
 RUN npm install cors
-
-# Install required npm modules
 RUN npm install body-parser jsonwebtoken
-
-RUN npm install jsonwebtoken
-
-
 RUN npm install axios
-
 
 # Install Node.js dependencies
 RUN npm install
